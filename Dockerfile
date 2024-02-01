@@ -4,5 +4,4 @@ COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 ENV FLASK_APP=app.py
-EXPOSE 5002
-CMD ["flask", "run", "--host=0.0.0.0", "--port=5002"]
+CMD ["flask", "run", "--host=0.0.0.0", "--port=${PORT:-5000}"]
