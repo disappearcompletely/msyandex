@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import request, jsonify
+from flask import request, jsonify, render_template
 from models import db, MenuItem, Order, Reservation
 from datetime import datetime
 from prometheus_flask_exporter import PrometheusMetrics
@@ -19,6 +19,10 @@ def create_tables():
     if not is_db_initialized:
         db.create_all()
         is_db_initialized = True
+
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 @app.route('/menu', methods=['POST'])
 def add_menu_item():
