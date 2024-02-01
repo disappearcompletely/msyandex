@@ -6,19 +6,31 @@ from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
 metrics = PrometheusMetrics(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////app/data/food_ordering.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/Users/Dmitriy/Desktop/msyandex/data/food_ordering.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
 is_db_initialized = False
-#zxc#zxc
+
 @app.before_request
 def create_tables():
     global is_db_initialized
     if not is_db_initialized:
         db.create_all()
         is_db_initialized = True
+
+@app.route('/menu', methods=['POST'])
+def add_menu_item():
+    data = request.json
+    name = data.get('name')
+    price = data.get('price')
+    if not name or price is None:
+        return jsonify({"error": "Missing name or price"}), 400
+    new_item = MenuItem(name=name, price=price)
+    db.session.add(new_item)
+    db.session.commit()
+    return jsonify({"message": "Позиция была создана", "id": new_item.id}), 201
 
 @app.route('/menu', methods=['GET'])
 def get_menu():
@@ -39,7 +51,7 @@ def make_order():
             total_price += item.price
             order_items.append(item.name)
         else:
-            return jsonify(message="Item not found", item_id=item_id), 404
+            return jsonify(message="Заказ не найден", item_id=item_id), 404
 
     new_order = Order(items=str(order_items), total_price=total_price)
     db.session.add(new_order)
@@ -64,7 +76,7 @@ def reserve_seat():
     )
     db.session.add(new_reservation)
     db.session.commit()
-    return jsonify(message="Reservation made successfully", reservation_id=new_reservation.id)
+    return jsonify(message="Место успешно забронировано", reservation_id=new_reservation.id)
 
 @app.route('/reservations', methods=['GET'])
 def get_reservations():
@@ -95,8 +107,8 @@ def cancel_reservation(reservation_id):
     if reservation:
         db.session.delete(reservation)
         db.session.commit()
-        return jsonify(message="Reservation cancelled successfully")
-    return jsonify(message="Reservation not found"), 404
+        return jsonify(message="Бронь успешно отменена")
+    return jsonify(message="Бронь не найдена"), 404
 
 
 if __name__ == '__main__':
