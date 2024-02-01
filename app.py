@@ -3,11 +3,14 @@ from flask import request, jsonify, render_template
 from models import db, MenuItem, Order, Reservation
 from datetime import datetime
 from prometheus_flask_exporter import PrometheusMetrics
+import os
 
 app = Flask(__name__)
 metrics = PrometheusMetrics(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/Users/Dmitriy/Desktop/msyandex/data/food_ordering.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+
 
 db.init_app(app)
 
@@ -116,4 +119,5 @@ def cancel_reservation(reservation_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5002)
+    port = int(os.getenv('PORT', '5000'))
+    app.run(debug=True, port=port)
