@@ -41,6 +41,3 @@ jobs:
           folder-id: ${{ secrets.YC_FOLDER_ID }}
           revision-image-url: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/delivery-service:latest
           revision-service-account-id: ${{ secrets.YC_SA_ID }}
-          # revision-env: |
-          #   AMQP_URL=${{ secrets.ENV_AMQP_URL }}
-          #   POSTGRES_URL=${{ secrets.ENV_POSTGRES_URL }}
