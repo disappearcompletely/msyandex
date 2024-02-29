@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: club
       POSTGRES_USER: dmitriy
-      POSTGRES_PASSWORD: 321123
+      POSTGRES_PASSWOR D: 321123
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
