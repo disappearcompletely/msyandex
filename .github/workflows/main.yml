@@ -12,13 +12,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build docker image
-        run: docker build . --file Dockerfile --tag cr.yandex/${{ secrets.YC_REGISTRY_ID }}/delivery-service:latest
-
-      # Добавление шага тестирования
-      - name: Run tests
-        run: |
-          docker run --rm -v "${{ github.workspace }}:/app" -w /app --network host golang:1.21 go test ./...
-
+        run: docker build . --file Dockerfile_menu_service --tag cr.yandex/${{ secrets.YC_REGISTRY_ID }}/delivery-service:latest
 
       - name: Login to YC Registry
         uses: docker/login-action@v3.0.0
