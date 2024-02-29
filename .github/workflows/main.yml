@@ -42,3 +42,26 @@ jobs:
 
       - name: Push reservation_service tag to YC Registry
         run: docker push cr.yandex/${{ secrets.YC_REGISTRY_ID }}/reservation-service:latest
+
+  deploy-services:
+    name: Deploy services to Yandex Cloud
+    runs-on: ubuntu-latest
+    needs: [ build-and-push-menu-service, build-and-push-reservation-service ]
+    steps:
+      - name: Deploy menu_service to Yandex Cloud
+        uses: yc-actions/yc-sls-container-deploy@v1
+        with:
+          yc-sa-json-credentials: ${{ secrets.YC_KEYS }}
+          container-name: menu-service
+          folder-id: ${{ secrets.YC_FOLDER_ID }}
+          revision-image-url: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/menu-service:latest
+          revision-service-account-id: ${{ secrets.YC_SA_ID }}
+
+      - name: Deploy reservation_service to Yandex Cloud
+        uses: yc-actions/yc-sls-container-deploy@v1
+        with:
+          yc-sa-json-credentials: ${{ secrets.YC_KEYS }}
+          container-name: reservation-service
+          folder-id: ${{ secrets.YC_FOLDER_ID }}
+          revision-image-url: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/reservation-service:latest
+          revision-service-account-id: ${{ secrets.YC_SA_ID }}
