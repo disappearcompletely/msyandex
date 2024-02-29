@@ -5,14 +5,15 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-push-menu-service:
+  build-and-push-to-yc:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Build docker image for menu_service
+      - name: Build docker image
         run: docker build . --file Dockerfile_menu_service --tag cr.yandex/${{ secrets.YC_REGISTRY_ID }}/menu-service:latest
+
 
       - name: Login to YC Registry
         uses: docker/login-action@v3.0.0
@@ -21,59 +22,22 @@ jobs:
           username: json_key
           password: ${{ secrets.YC_KEYS }}
 
-      - name: Push menu_service tag to YC Registry
-        run: docker push cr.yandex/${{ secrets.YC_REGISTRY_ID }}/menu-service:latest
+      - name: Push tag to YC Registry
+        run: docker push cr.yandex/${{ secrets.YC_REGISTRY_ID }}/delivery-service:latest
 
-  build-and-push-reservations-service:
-    needs: build-and-push-menu-service
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
+    needs: build-and-push-to-yc
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Build docker image for reservations_service
-        run: docker build . --file Dockerfile_reservation_service --tag cr.yandex/${{ secrets.YC_REGISTRY_ID }}/reservations-service:latest
-
-      - name: Login to YC Registry (if needed)
-        uses: docker/login-action@v3.0.0
-        with:
-          registry: cr.yandex
-          username: json_key
-          password: ${{ secrets.YC_KEYS }}
-
-      - name: Push reservations_service tag to YC Registry
-        run: docker push cr.yandex/${{ secrets.YC_REGISTRY_ID }}/reservations-service:latest
-
-  deploy-menu-service:
-    name: Deploy Menu Service
-    runs-on: ubuntu-latest
-    needs: build-and-push-reservations-service
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Deploy menu_service container
+      - name: Deploy serverless container
         uses: yc-actions/yc-sls-container-deploy@v1
         with:
           yc-sa-json-credentials: ${{ secrets.YC_KEYS }}
           container-name: ${{ secrets.YC_CONTAINER_NAME }}
           folder-id: ${{ secrets.YC_FOLDER_ID }}
-          revision-image-url: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/menu-service:latest
-          revision-service-account-id: ${{ secrets.YC_SA_ID }}
-
-  deploy-reservations-service:
-    name: Deploy Reservations Service
-    runs-on: ubuntu-latest
-    needs: deploy-menu-service
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Deploy reservations_service container
-        uses: yc-actions/yc-sls-container-deploy@v1
-        with:
-          yc-sa-json-credentials: ${{ secrets.YC_KEYS }}
-          container-name: ${{ secrets.YC_CONTAINER_NAME }}
-          folder-id: ${{ secrets.YC_FOLDER_ID }}
-          revision-image-url: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/reservations-service:latest
+          revision-image-url: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/delivery-service:latest
           revision-service-account-id: ${{ secrets.YC_SA_ID }}
