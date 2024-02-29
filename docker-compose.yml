@@ -1,42 +1,25 @@
 version: '3.8'
-services:
 
+services:
   db:
     image: postgres:latest
     environment:
       POSTGRES_DB: club
       POSTGRES_USER: dmitriy
-      POSTGRES_PASSWOR D: 321123
+      POSTGRES_PASSWORD: 321123
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
-  menu_service:
-    build:
-      context: .
-      dockerfile: Dockerfile_menu_service
+  app:
+    build: .
     ports:
       - "5002:5002"
     environment:
       - DATABASE_URL=postgresql://dmitriy:321123@db/club
     depends_on:
       - db
-      - prometheus
-      - grafana
-
-  reservation_service:
-    build:
-      context: .
-      dockerfile: Dockerfile_reservation_service
-    ports:
-      - "5003:5003"
-    environment:
-      - DATABASE_URL=postgresql://dmitriy:321123@db/club
-    depends_on:
-      - db
-      - prometheus
-      - grafana
 
   prometheus:
     image: prom/prometheus:latest
@@ -45,21 +28,24 @@ services:
     ports:
       - "9090:9090"
 
+  keycloak:
+    volumes:
+      - ./imports:/opt/jboss/keycloak/imports
+    image: quay.io/keycloak/keycloak
+    ports:
+      - "3030:8080"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command:
+      - start-dev
+
   grafana:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
-
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    ports:
-      - "8080:8080"
-    restart: always
+    depends_on:
+      - prometheus
 
   loki:
     image: grafana/loki:latest
@@ -74,7 +60,8 @@ services:
       - /var/log:/var/log
       - /var/lib/docker/containers:/var/lib/docker/containers
       - ./promtail-config.yaml:/etc/promtail/config.yml
-    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
 
 volumes:
   postgres_data:
