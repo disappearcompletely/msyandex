@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timezone
 
 db = SQLAlchemy()
 
@@ -12,7 +12,7 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     items = db.Column(db.String(300), nullable=False)
     total_price = db.Column(db.Float, nullable=False)
-    order_time = db.Column(db.DateTime, default=datetime.utcnow)
+    order_time = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Reservation(db.Model):
     id = db.Column(db.Integer, primary_key=True)

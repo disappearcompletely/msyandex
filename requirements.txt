@@ -1,3 +1,6 @@
 Flask==3.0.0
 Flask-SQLAlchemy==3.1.1
 prometheus_flask_exporter
+psycopg2-binary
+requests
+psycopg2-binary
