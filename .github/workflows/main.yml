@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build docker image
-        run: docker build . --file Dockerfile_menu_service --tag cr.yandex/${{ secrets.YC_REGISTRY_ID }}/menu-service:latest
+        run: docker build . --file Dockerfile_menu_service --tag cr.yandex/${{ secrets.YC_REGISTRY_ID }}/delivery-service:latest
 
 
       - name: Login to YC Registry
@@ -23,7 +23,7 @@ jobs:
           password: ${{ secrets.YC_KEYS }}
 
       - name: Push tag to YC Registry
-        run: docker push cr.yandex/${{ secrets.YC_REGISTRY_ID }}/menu-service:latest
+        run: docker push cr.yandex/${{ secrets.YC_REGISTRY_ID }}/delivery-service:latest
 
   deploy:
     name: Deploy
@@ -39,5 +39,5 @@ jobs:
           yc-sa-json-credentials: ${{ secrets.YC_KEYS }}
           container-name: ${{ secrets.YC_CONTAINER_NAME }}
           folder-id: ${{ secrets.YC_FOLDER_ID }}
-          revision-image-url: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/menu-service:latest
+          revision-image-url: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/delivery-service:latest
           revision-service-account-id: ${{ secrets.YC_SA_ID }}
