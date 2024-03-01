@@ -1,25 +1,14 @@
 version: '3.8'
-
 services:
-  db:
-    image: postgres:latest
-    environment:
-      POSTGRES_DB: club
-      POSTGRES_USER: dmitriy
-      POSTGRES_PASSWORD: 321123
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
   app:
     build: .
     ports:
       - "5002:5002"
-    environment:
-      - DATABASE_URL=postgresql://dmitriy:321123@db/club
+    volumes:
+      - db_volume:/app
     depends_on:
-      - db
+      - prometheus
+      - grafana
 
   prometheus:
     image: prom/prometheus:latest
@@ -32,8 +21,17 @@ services:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
-    depends_on:
-      - prometheus
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "8080:8080"
+    restart: always
 
   loki:
     image: grafana/loki:latest
@@ -48,8 +46,7 @@ services:
       - /var/log:/var/log
       - /var/lib/docker/containers:/var/lib/docker/containers
       - ./promtail-config.yaml:/etc/promtail/config.yml
-    depends_on:
-      - loki
+    command: -config.file=/etc/promtail/config.yml
 
 volumes:
-  postgres_data:
+  db_volume:
