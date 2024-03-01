@@ -7,7 +7,6 @@ import os
 
 app = Flask(__name__)
 metrics = PrometheusMetrics(app)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/Users/Dmitriy/Desktop/mscc/data/food_ordering.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///food_ordering.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
